@@ -1,0 +1,60 @@
+{
+  "name": "@ruivalim/shell-exec",
+  "version": "0.1.0",
+  "description": "A custom Backstage scaffolder action to execute shell commands.",
+  "main": "dist/index.cjs.js",
+  "types": "dist/index.d.ts",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "backend-plugin-module",
+    "pluginId": "scaffolder",
+    "pluginPackage": "@backstage/plugin-scaffolder-backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ruivalim/shell-exec.git",
+    "directory": "."
+  },
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack"
+  },
+  "keywords": [
+    "backstage",
+    "shell",
+    "exec",
+    "command",
+    "backstage-scaffolder",
+    "backstage-custom-action",
+    "backstage-plugin",
+    "backstage-template"
+  ],
+  "author": "Rui Valim",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "peerDependencies": {
+    "@backstage/plugin-scaffolder-node": "^0.12.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@backstage/cli": "^0.27.0",
+    "@backstage/plugin-scaffolder-node": "^0.12.1",
+    "@types/node": "^22.10.0"
+  },
+  "bugs": {
+    "url": "https://github.com/Ruivalim/shell-exec/issues"
+  },
+  "homepage": "https://github.com/Ruivalim/shell-exec#readme"
+}

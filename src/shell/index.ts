@@ -1,0 +1,1 @@
+export { shellExec } from "./exec";
