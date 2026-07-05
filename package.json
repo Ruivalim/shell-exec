@@ -1,6 +1,6 @@
 {
   "name": "@ruivalim/shell-exec",
-  "version": "0.1.0",
+  "version": "0.1.7",
   "description": "A custom Backstage scaffolder action to execute shell commands.",
   "main": "dist/index.cjs.js",
   "types": "dist/index.d.ts",
@@ -41,13 +41,13 @@
   ],
   "author": "Rui Valim",
   "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
   "dependencies": {},
   "peerDependencies": {
     "@backstage/plugin-scaffolder-node": "^0.12.1"
   },
-  "files": [
-    "dist"
-  ],
   "devDependencies": {
     "@backstage/cli": "^0.27.0",
     "@backstage/plugin-scaffolder-node": "^0.12.1",
