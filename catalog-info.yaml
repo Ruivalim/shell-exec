@@ -1,20 +1,20 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: scaffolder-backend-module-kubernetes-apply
+  name: scaffolder-backend-module-shell-exec
   description: |
-    A custom Backstage scaffolder action to apply any Kubernetes resource.
+    A custom Backstage scaffolder action to execute shell commands and scripts.
   links:
     - title: Repository
-      url: https://github.com/Ruivalim/kubernetes-apply
+      url: https://github.com/Ruivalim/shell-exec
     - title: npm
-      url: https://www.npmjs.com/package/@ruivalim/kubernetes-apply
+      url: https://www.npmjs.com/package/@ruivalim/shell-exec
   annotations:
-    github.com/project-slug: Ruivalim/kubernetes-apply
+    github.com/project-slug: Ruivalim/shell-exec
   tags:
     - backstage
-    - kubernetes
-    - apply
+    - shell
+    - exec
     - scaffold
     - action
     - plugin

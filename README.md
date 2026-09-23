@@ -20,10 +20,20 @@ Use this action when you need to:
 Add the package to your Backstage backend:
 
 ```bash
-yarn add --cwd packages/backend @ruivalim/shell-exec
+yarn --cwd packages/backend add @ruivalim/shell-exec
 ```
 
-Register the action in your scaffolder module (`packages/backend/src/modules/scaffolder/index.ts`):
+Then register the module in `packages/backend/src/index.ts`:
+
+```typescript
+backend.add(import('@ruivalim/shell-exec'));
+```
+
+That's it, `shell:exec` shows up in the list of installed actions (`/create/actions`).
+
+### Registering the action yourself
+
+If you already have your own scaffolder module, add the action there instead:
 
 ```typescript
 import { createBackendModule } from '@backstage/backend-plugin-api';
@@ -45,6 +55,16 @@ export default createBackendModule({
   },
 });
 ```
+
+## How `command` and `args` are run
+
+- **Without `args`**, `command` runs through the shell (`/bin/sh`), so pipes, `&&`, redirects and variables work:
+  `command: echo hello | tr a-z A-Z`
+- **With `args`**, `command` is executed directly and every item of `args` reaches it exactly as written. Nothing in `args` is interpreted by a shell, so a template parameter like `foo; rm -rf ~` stays a harmless string.
+
+Put template parameters in `args` whenever you can.
+
+> **Changed in 0.2.0.** Up to 0.1.x, `args` were joined with spaces and handed to the shell. That broke arguments containing spaces and let parameter values run as shell code. If you relied on shell syntax inside `args`, move the whole line into `command` and drop `args`.
 
 ## Usage
 
@@ -122,6 +142,8 @@ steps:
 
 ### Execute with Environment Variables
 
+`sh -c` receives the script as a single argument, and `$1` is taken from the next one, so the parameter never becomes shell code:
+
 ```yaml
 steps:
   - id: deploy
@@ -131,7 +153,9 @@ steps:
       command: sh
       args:
         - '-c'
-        - 'export API_KEY=${{ secrets.apiKey }} && ./deploy.sh ${{ parameters.env }}'
+        - 'API_KEY="$0" ./deploy.sh "$1"'
+        - '${{ secrets.apiKey }}'
+        - '${{ parameters.env }}'
 ```
 
 ### Using Outputs from Scripts
@@ -211,7 +235,7 @@ Working directory where the command should be executed.
 
 **Type:** `string`
 
-**Default:** Template workspace path
+**Default:** Template workspace path. A relative path is resolved against the workspace.
 
 **Example:**
 ```yaml
@@ -282,7 +306,7 @@ The complete standard error output from the executed command.
 
 ### exitCode
 
-The exit code returned by the command (always 0 for successful executions).
+The exit code returned by the command. It is always 0, since any other exit code fails the step.
 
 **Type:** `number`
 
@@ -298,7 +322,8 @@ All output appears in the Backstage scaffolder task logs.
 ## Error Handling
 
 The action will:
-- Throw an error if the command exits with a non-zero exit code
+- Fail the step if the command exits with a non-zero exit code
+- Fail the step if the command is killed by a signal (for example by the OOM killer)
 - Log detailed error information including command, args, and error message
 - Halt template execution on failure
 
@@ -306,7 +331,7 @@ The action will:
 
 ⚠️ **Important Security Notes:**
 
-1. **Command Injection Risk:** Be careful when using user input in commands. Always validate and sanitize parameters.
+1. **Command Injection Risk:** Never put user input inside `command`, since it goes through the shell. Pass it in `args`, which are not interpreted.
 
 2. **File Permissions:** Ensure scripts have execute permissions (`chmod +x script.sh`) before running them.
 
@@ -321,7 +346,7 @@ The action will:
 ✅ **Do:**
 - Use explicit paths for scripts (e.g., `./scripts/setup.sh`)
 - Validate user input before passing to commands
-- Use parameter substitution: `${{ parameters.name }}`
+- Pass template parameters in `args`, never inside `command`
 - Check script exit codes
 - Log important information
 
@@ -333,9 +358,8 @@ The action will:
 
 ## Requirements
 
-- Backstage version: `^1.0.0`
-- `@backstage/plugin-scaffolder-node`: `^0.12.1`
-- Node.js: `>=18.0.0`
+- Backstage with the new backend system (tested on Backstage 1.55)
+- Node.js 22 or 24
 
 ## Troubleshooting
 
@@ -364,10 +388,6 @@ Make scripts executable before running:
   input:
     command: './scripts/setup.sh'
 ```
-
-### Command not showing output
-
-The action uses the `logger` parameter (not deprecated `logStream`) to capture output. Ensure you're using version `>=0.1.5`.
 
 ## Contributing
 

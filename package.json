@@ -1,6 +1,6 @@
 {
   "name": "@ruivalim/shell-exec",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "A custom Backstage scaffolder action to execute shell commands.",
   "main": "dist/index.cjs.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,8 @@
     "test": "backstage-cli package test",
     "clean": "backstage-cli package clean",
     "prepack": "backstage-cli package prepack",
-    "postpack": "backstage-cli package postpack"
+    "postpack": "backstage-cli package postpack",
+    "tsc": "tsc"
   },
   "keywords": [
     "backstage",
@@ -44,17 +45,27 @@
   "files": [
     "dist"
   ],
-  "dependencies": {},
-  "peerDependencies": {
-    "@backstage/plugin-scaffolder-node": "^0.12.1"
+  "dependencies": {
+    "@backstage/backend-plugin-api": "^1.10.1",
+    "@backstage/plugin-scaffolder-node": "^0.13.7"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.27.0",
-    "@backstage/plugin-scaffolder-node": "^0.12.1",
-    "@types/node": "^22.10.0"
+    "@backstage/cli": "^0.36.6",
+    "@backstage/cli-defaults": "^0.1.6",
+    "@backstage/plugin-scaffolder-node-test-utils": "^0.3.15",
+    "@jest/environment-jsdom-abstract": "~30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.0",
+    "jest": "~30.2.0",
+    "jsdom": "^27.1.0",
+    "typescript": "~5.8.0"
   },
   "bugs": {
     "url": "https://github.com/Ruivalim/shell-exec/issues"
   },
-  "homepage": "https://github.com/Ruivalim/shell-exec#readme"
+  "homepage": "https://github.com/Ruivalim/shell-exec#readme",
+  "engines": {
+    "node": "22 || 24"
+  },
+  "packageManager": "yarn@1.22.22"
 }

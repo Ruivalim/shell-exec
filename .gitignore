@@ -1,5 +1,6 @@
 node_modules
 .idea
 dist
-dist-types.npmrc
+dist-types
+.npmrc
 .DS_Store

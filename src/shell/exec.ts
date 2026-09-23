@@ -1,5 +1,8 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 import { spawn } from 'child_process';
+import * as path from 'path';
+
+const OUTPUT_VALUE_PATTERN = /^EXEC_SHELL_OUTPUT_VALUE=(.*)$/m;
 
 export const shellExec = () => {
     return createTemplateAction({
@@ -9,9 +12,9 @@ export const shellExec = () => {
         schema: {
             input: z =>
                 z.object({
-                    command: z.string().describe('The shell command or script to execute'),
-                    args: z.array(z.string()).optional().describe('Optional array of arguments to pass to the command'),
-                    cwd: z.string().optional().describe('Optional working directory for the command (defaults to workspacePath)'),
+                    command: z.string().describe('The command to execute. Without args it runs through the shell, so pipes and && work'),
+                    args: z.array(z.string()).optional().describe('Arguments passed to the command as-is, without shell interpretation'),
+                    cwd: z.string().optional().describe('Working directory, relative to the workspace (defaults to the workspace)'),
                 }),
             output: z =>
                 z.object({
@@ -23,8 +26,11 @@ export const shellExec = () => {
         },
         async handler(ctx) {
             const { command, args, cwd } = ctx.input;
-            const workingDirectory = cwd || ctx.workspacePath;
-            const commandArgs = args || [];
+            const workingDirectory = cwd ? path.resolve(ctx.workspacePath, cwd) : ctx.workspacePath;
+            // With shell: true Node joins args with spaces and hands the string to the shell,
+            // so a template parameter in args would be interpreted as shell syntax.
+            const useShell = args === undefined;
+            const commandArgs = args ?? [];
 
             ctx.logger.info(`Executing shell command: ${command}`, {
                 command,
@@ -32,13 +38,13 @@ export const shellExec = () => {
                 cwd: workingDirectory,
             });
 
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 let stdout = '';
                 let stderr = '';
 
                 const child = spawn(command, commandArgs, {
                     cwd: workingDirectory,
-                    shell: true,
+                    shell: useShell,
                 });
 
                 child.stdout?.on('data', (data) => {
@@ -63,41 +69,33 @@ export const shellExec = () => {
                     reject(error);
                 });
 
-                child.on('close', (exitCode) => {
-                    const code = exitCode || 0;
-
-                    // Extract value from EXEC_SHELL_OUTPUT_VALUE in stdout
-                    let outputValue: string | undefined;
-                    const lines = stdout.split('\n');
-                    for (const line of lines) {
-                        const match = line.match(/^EXEC_SHELL_OUTPUT_VALUE=(.*)$/);
-                        if (match) {
-                            outputValue = match[1].trim();
-                            break;
-                        }
-                    }
-
-                    if (code !== 0) {
-                        ctx.logger.error(`Command exited with code ${code}: ${command}`, {
+                child.on('close', (exitCode, signal) => {
+                    // exitCode is null when the process was killed by a signal
+                    if (exitCode !== 0) {
+                        const reason = exitCode === null ? `was killed by signal ${signal}` : `exited with code ${exitCode}`;
+                        ctx.logger.error(`Command ${reason}: ${command}`, {
                             command,
                             args: commandArgs,
                             cwd: workingDirectory,
-                            exitCode: code,
+                            exitCode,
+                            signal,
                             stderr,
                         });
-                        reject(new Error(`Command failed with exit code ${code}`));
-                    } else {
-                        ctx.logger.info(`Successfully executed command: ${command}`);
-
-                        if (outputValue) {
-                            ctx.output('value', outputValue);
-                        }
-                        ctx.output('stdout', stdout);
-                        ctx.output('stderr', stderr);
-                        ctx.output('exitCode', code);
-
-                        resolve();
+                        reject(new Error(`Command ${reason}`));
+                        return;
                     }
+
+                    ctx.logger.info(`Successfully executed command: ${command}`);
+
+                    const outputValue = stdout.match(OUTPUT_VALUE_PATTERN)?.[1].trim();
+                    if (outputValue) {
+                        ctx.output('value', outputValue);
+                    }
+                    ctx.output('stdout', stdout);
+                    ctx.output('stderr', stderr);
+                    ctx.output('exitCode', exitCode);
+
+                    resolve();
                 });
             });
         },
