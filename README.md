@@ -407,3 +407,11 @@ Rui Valim
 - [NPM Package](https://www.npmjs.com/package/@ruivalim/shell-exec)
 - [Issue Tracker](https://github.com/Ruivalim/shell-exec/issues)
 - [Backstage Documentation](https://backstage.io/docs/features/software-templates/writing-custom-actions)
+
+## Releasing
+
+Releases are automated. Commits follow [Conventional Commits](https://www.conventionalcommits.org): `fix:` and `feat:` go into the next release, `feat!:` or a `BREAKING CHANGE:` footer marks a breaking one.
+
+[release-please](https://github.com/googleapis/release-please) keeps a release PR open with the next version and changelog. Merging it tags the release and publishes it to npm with provenance, through npm trusted publishing.
+
+Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com): stable patch and minor updates merge on their own once CI passes, Backstage packages come grouped in one PR for review.
