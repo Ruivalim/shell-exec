@@ -55,7 +55,7 @@
     "@backstage/plugin-scaffolder-node-test-utils": "^0.3.15",
     "@jest/environment-jsdom-abstract": "~30.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.10.0",
+    "@types/node": "^24.0.0",
     "jest": "~30.2.0",
     "jsdom": "^27.1.0",
     "typescript": "~5.8.0"
