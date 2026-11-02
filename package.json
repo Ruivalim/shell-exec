@@ -58,7 +58,7 @@
     "@types/node": "^22.10.0",
     "jest": "~30.5.0",
     "jsdom": "^27.1.0",
-    "typescript": "~5.9.0"
+    "typescript": "~7.0.0"
   },
   "bugs": {
     "url": "https://github.com/Ruivalim/shell-exec/issues"
